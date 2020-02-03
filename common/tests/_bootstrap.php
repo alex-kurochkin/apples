@@ -7,3 +7,5 @@ require_once __DIR__ .  '/../../vendor/autoload.php';
 require_once __DIR__ .  '/../../vendor/yiisoft/yii2/Yii.php';
 require __DIR__ . '/../config/bootstrap.php';
 
+Yii::setAlias('@tests', __DIR__);
+Yii::setAlias('@app', dirname(__DIR__) .'/source');
