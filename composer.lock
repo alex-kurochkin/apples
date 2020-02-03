@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "62c1489b0b2447c740fc2c8d3d6e7a7e",
+    "content-hash": "2fb84404c95e315a6a872398f89ea638",
     "packages": [
         {
             "name": "bower-asset/bootstrap",
@@ -625,6 +625,54 @@
                 "shim"
             ],
             "time": "2019-11-27T13:56:44+00:00"
+        },
+        {
+            "name": "yidas/yii2-jquery",
+            "version": "3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yidas/yii2-jquery.git",
+                "reference": "7c65a16b2a69b1919be13842c8a4b49a61f7e21d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yidas/yii2-jquery/zipball/7c65a16b2a69b1919be13842c8a4b49a61f7e21d",
+                "reference": "7c65a16b2a69b1919be13842c8a4b49a61f7e21d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0",
+                "yiisoft/yii2": "~2.0.6"
+            },
+            "provide": {
+                "bower-asset/jquery": "*"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "yidas\\yii\\jquery\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nick Tsai",
+                    "email": "myintaer@gmail.com",
+                    "homepage": "https://github.com/yidas/"
+                }
+            ],
+            "description": "jQuery Asset Bundle extension with fixed and CDN sources for Yii2 framework",
+            "keywords": [
+                "asset",
+                "asset bundle",
+                "jquery",
+                "yii",
+                "yii2"
+            ],
+            "time": "2018-09-29T03:17:14+00:00"
         },
         {
             "name": "yiisoft/yii2",
@@ -4248,7 +4296,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.6.0"
+        "php": ">=7.3.0"
     },
     "platform-dev": []
 }

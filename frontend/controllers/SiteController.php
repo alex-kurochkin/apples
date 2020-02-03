@@ -28,7 +28,7 @@ class SiteController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['logout', 'signup'],
+                'only' => ['logout', 'signup', 'apples'],
                 'rules' => [
                     [
                         'actions' => ['signup'],
@@ -37,6 +37,11 @@ class SiteController extends Controller
                     ],
                     [
                         'actions' => ['logout'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                    [
+                        'actions' => ['apples'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -256,5 +261,10 @@ class SiteController extends Controller
         return $this->render('resendVerificationEmail', [
             'model' => $model
         ]);
+    }
+
+    public function actionApples()
+    {
+        return $this->render('apples');
     }
 }

@@ -26,7 +26,7 @@ class m200203_081002_create_apples_table extends Migration
             [5, 'blue'],
         ]);
 
-        $this->createTable('{{%apples}}', [
+        $this->createTable('{{%apple}}', [
             'id' => $this->primaryKey(),
             'color_id' => $this->integer()->notNull(),
             'created' => $this->dateTime()->null(),
@@ -53,7 +53,7 @@ class m200203_081002_create_apples_table extends Migration
             'apples'
         );
 
-        $this->dropTable('{{%apples}}');
+        $this->dropTable('{{%apple}}');
         $this->dropTable('{{%apple_color}}');
     }
 }
