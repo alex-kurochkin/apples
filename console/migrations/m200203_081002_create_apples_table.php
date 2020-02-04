@@ -2,9 +2,6 @@
 
 use yii\db\Migration;
 
-/**
- * Handles the creation of table `{{%apples}}`.
- */
 class m200203_081002_create_apples_table extends Migration
 {
 
@@ -15,28 +12,38 @@ class m200203_081002_create_apples_table extends Migration
     {
         $this->createTable('{{%apple_color}}', [
             'id' => $this->primaryKey(),
+            'user_id' => $this->integer()->notNull(),
             'color' => $this->string()->notNull(),
-        ]);
-
-        $this->batchInsert('apple_color', ['id', 'color'], [
-            [1, 'red'],
-            [2, 'green'],
-            [3, 'yellow'],
-            [4, 'orange'],
-            [5, 'blue'],
         ]);
 
         $this->createTable('{{%apple}}', [
             'id' => $this->primaryKey(),
+            'user_id' => $this->integer()->notNull(),
             'color_id' => $this->integer()->notNull(),
-            'created' => $this->dateTime()->null(),
-            'fallen' => $this->dateTime()->null(),
             'eaten_percent' => $this->float()->notNull()->defaultValue(0),
+            'created_at' => $this->dateTime()->null(),
+            'fallen_at' => $this->dateTime()->null(),
         ]);
 
         $this->addForeignKey(
-            'fk-apples-color_id',
-            'apples',
+            'fk-apple-user_id',
+            'apple',
+            'user_id',
+            'user',
+            'id'
+        );
+
+        $this->addForeignKey(
+            'fk-apple_color-user_id',
+            'apple_color',
+            'user_id',
+            'user',
+            'id'
+        );
+
+        $this->addForeignKey(
+            'fk-apple-color_id',
+            'apple',
             'color_id',
             'apple_color',
             'id'
@@ -49,8 +56,18 @@ class m200203_081002_create_apples_table extends Migration
     public function safeDown()
     {
         $this->dropForeignKey(
-            'fk-apples-color_id',
-            'apples'
+            'fk-apple-user_id',
+            'apple'
+        );
+
+        $this->dropForeignKey(
+            'fk-apple_color-user_id',
+            'apple_color'
+        );
+
+        $this->dropForeignKey(
+            'fk-apple-color_id',
+            'apple'
         );
 
         $this->dropTable('{{%apple}}');
