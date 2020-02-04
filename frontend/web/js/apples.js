@@ -11,4 +11,9 @@ $(document).ready(function() {
         '<td>Eaten %</td>' +
         '<td>Drop it</td>' +
         '</tr>');
+
+    $.get('http://api-apples.local/apples/list', function( data ) {
+        // $( ".result" ).html( data );
+        console.log(data);
+    });
 });

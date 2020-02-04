@@ -13,4 +13,3 @@ APPLES
         <tbody id="apples-list"></tbody>
     </table>
 </div>
-<?php
