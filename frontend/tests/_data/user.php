@@ -4,6 +4,7 @@ return [
     [
         'username' => 'okirlin',
         'auth_key' => 'iwTNae9t34OmnK6l4vT4IeaTk-YWI2Rv',
+        'access_token' => 'tester-token',
         'password_hash' => '$2y$13$CXT0Rkle1EMJ/c1l5bylL.EylfmQ39O5JlHJVFpNn618OUS1HwaIi',
         'password_reset_token' => 't5GU9NwpuGYSfb7FEZMAxqtuz2PkEvv_' . time(),
         'created_at' => '1391885313',
@@ -13,6 +14,7 @@ return [
     [
         'username' => 'troy.becker',
         'auth_key' => 'EdKfXrx88weFMV0vIxuTMWKgfK2tS3Lp',
+        'access_token' => 'tester2-token',
         'password_hash' => '$2y$13$g5nv41Px7VBqhS3hVsVN2.MKfgT3jFdkXEsMC4rQJLfaMa7VaJqL2',
         'password_reset_token' => '4BSNyiZNAuxjs5Mty990c47sVrgllIi_' . time(),
         'created_at' => '1391885313',
@@ -23,6 +25,7 @@ return [
     [
         'username' => 'test.test',
         'auth_key' => 'O87GkY3_UfmMHYkyezZ7QLfmkKNsllzT',
+        'access_token' => 'tester3-token',
         //Test1234
         'password_hash' => '$2y$13$d17z0w/wKC4LFwtzBcmx6up4jErQuandJqhzKGKczfWuiEhLBtQBK',
         'email' => 'test@mail.com',
@@ -34,6 +37,7 @@ return [
     [
         'username' => 'test2.test',
         'auth_key' => '4XXdVqi3rDpa_a6JH6zqVreFxUPcUPvJ',
+        'access_token' => 'tester4-token',
         //Test1234
         'password_hash' => '$2y$13$d17z0w/wKC4LFwtzBcmx6up4jErQuandJqhzKGKczfWuiEhLBtQBK',
         'email' => 'test2@mail.com',
