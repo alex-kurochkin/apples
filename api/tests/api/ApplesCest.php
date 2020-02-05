@@ -28,10 +28,10 @@ class ApplesApiCest
      * @param ApiTester $I
      * @group ApplesAPI
      */
-    public function testApplesApi(ApiTester $I)
+    public function testApplesGetApi(ApiTester $I)
     {
-        $I->wantToTest('Access to /api/apples');
-        $I->amLoggedInAs(1);
+        $I->wantToTest('Access to /api/apples/list');
+        $I->amBearerAuthenticated('tester-token');
 
         $I->sendGET('apples/list');
         $I->seeResponseCodeIs(HttpCode::OK);
@@ -69,5 +69,38 @@ class ApplesApiCest
                 'message' => null,
             ]
         );
+
+        $applesBefore = $I->grabDataFromResponseByJsonPath('$.data.apples')[0];
+        return count($applesBefore);
+    }
+
+    /**
+     * @depends testApplesGetApi
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws \Exception
+     */
+    public function testApplesCreateApi(ApiTester $I)
+    {
+        $countBefore = $this->testApplesGetApi($I);
+
+        $I->wantToTest('Access to /api/apples/create');
+        $I->amBearerAuthenticated('tester-token');
+
+
+        $I->sendGET('apples/create');
+        $I->seeResponseCodeIs(HttpCode::OK);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['result' => 'success']);
+
+        $countNewApples = $I->grabDataFromResponseByJsonPath('$.data')[0];
+
+        $I->sendGET('apples/list');
+        $I->seeResponseCodeIs(HttpCode::OK);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['result' => 'success']);
+        $applesAfter = $I->grabDataFromResponseByJsonPath('$.data.apples')[0];
+
+        $I->assertEquals($countNewApples + $countBefore, count($applesAfter));
     }
 }
