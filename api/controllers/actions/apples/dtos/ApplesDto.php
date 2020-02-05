@@ -21,4 +21,7 @@ class ApplesDto extends BaseDto
      * @var AppleColor[]
      */
     public $appleColors = [];
+
+    /** @var int hours */
+    public $freshDuration;
 }
