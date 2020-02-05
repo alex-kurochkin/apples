@@ -13,3 +13,6 @@ APPLES
         <tbody id="apples-list"></tbody>
     </table>
 </div>
+<script>
+    let AccessToken = '<?= Yii::$app->user->identity->access_token; ?>';
+</script>

@@ -12,8 +12,17 @@ $(document).ready(function() {
         '<td>Drop it</td>' +
         '</tr>');
 
-    $.get('http://api-apples.local/apples/list', function( data ) {
-        // $( ".result" ).html( data );
-        console.log(data);
+    $.ajax({
+        url: 'http://api-apples.local/apples/list',
+        headers: {
+            'Authorization':'Bearer ' + AccessToken,
+            'Content-Type':'application/json'
+        },
+        method: 'GET',
+        dataType: 'json',
+        data: '',
+        success: function(data){
+            console.log(data);
+        }
     });
 });

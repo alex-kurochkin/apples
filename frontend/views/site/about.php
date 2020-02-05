@@ -9,6 +9,4 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="site-about">
     <h1><?= Html::encode($this->title) ?></h1>
-
-    Your access token: <?= Yii::$app->user->identity->access_token; ?>
 </div>
