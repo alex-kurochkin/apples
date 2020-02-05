@@ -38,5 +38,5 @@ class Apple
     /**
      * @var float
      */
-    public $eaten_percent;
+    public $eatenPercent = 0;
 }

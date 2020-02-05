@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace api\controllers;
 
+use api\controllers\actions\apples\CreateAction;
 use api\controllers\actions\apples\ListAction;
 use common\components\RestController;
 use yii\filters\auth\HttpBearerAuth;
@@ -52,9 +53,9 @@ class ApplesController  extends RestController
             'list' => [
                 'class' => ListAction::class,
             ],
-//            'create' => [
-//                'class' => CreateAction::class,
-//            ],
+            'create' => [
+                'class' => CreateAction::class,
+            ],
 //            'eat' => [
 //                'class' => EatAction::class,
 //            ],

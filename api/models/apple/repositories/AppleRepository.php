@@ -28,4 +28,13 @@ class AppleRepository extends BaseRepository
             $query->where([AppleAr::USER_ID => $userId]);
         });
     }
+
+    /**
+     * @param Apple[] $apples
+     */
+    public function createMany(array $apples) {
+        foreach ($apples as $apple) {
+            $this->createOne($apple);
+        }
+    }
 }

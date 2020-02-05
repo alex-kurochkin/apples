@@ -5,6 +5,7 @@ namespace api\models\apple\services;
 
 use api\models\apple\Apple;
 use api\models\apple\repositories\AppleRepository;
+use common\domain\utils\ObjectArrays;
 use yii\base\InvalidConfigException;
 
 /**
@@ -19,9 +20,15 @@ class AppleService
      */
     private $appleRepository;
 
-    public function __construct(AppleRepository $appleRepository)
+    /**
+     * @var AppleColorService
+     */
+    private $appleColorService;
+
+    public function __construct(AppleRepository $appleRepository, AppleColorService $appleColorService)
     {
         $this->appleRepository = $appleRepository;
+        $this->appleColorService = $appleColorService;
     }
 
     /**
@@ -32,5 +39,29 @@ class AppleService
     public function findManyByUserId(int $userId): array
     {
         return $this->appleRepository->findManyByUserId($userId);
+    }
+
+    /**
+     * @param int $userId
+     * @param int $count
+     * @throws InvalidConfigException
+     */
+    public function createMany(int $userId, int $count)
+    {
+        $now = time();
+        $apples = [];
+
+        $appleColors = $this->appleColorService->findManyByUserId($userId);
+        $colorIds = ObjectArrays::createFieldArray($appleColors, 'id');
+
+        while ($count--) {
+            $apple = new Apple;
+            $apple->userId = $userId;
+            $apple->colorId = $colorIds[array_rand($colorIds)];
+            $apple->createdAt = date_create_from_format('U', (string)rand($now - 10 * 86400, $now));
+            $apples[] = $apple;
+        }
+
+        $this->appleRepository->createMany($apples);
     }
 }

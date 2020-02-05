@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace api\models\apple\services;
 
+use api\models\apple\AppleColor;
 use api\models\apple\repositories\AppleColorRepository;
 use yii\base\InvalidConfigException;
 
