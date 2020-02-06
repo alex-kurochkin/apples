@@ -1,5 +1,6 @@
 <?php
 
+use common\components\Request;
 use common\components\Response;
 use common\components\ServiceRoute;
 
@@ -18,7 +19,7 @@ return [
     'modules' => [],
     'components' => [
         'request' => [
-            'class' => \common\components\Request::class,
+            'class' => Request::class,
             'cookieValidationKey' => 'Mj5RhfOP2KbMvyA_XbitIHjJHhJP56D',
             'enableCsrfValidation' => false,
             'enableCsrfCookie' => false,
@@ -52,13 +53,11 @@ return [
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
-            'rules' => [
-                'OPTIONS apples' => 'apples/options', // URL for CORS
-                'OPTIONS apples/<id:\d+>' => 'apples/options', // URL for CORS
-                'GET apples' => 'apples/list',
-                'POST apples' => 'apples/create',
-                'PATCH apples/<id:\d+>/<percent:\d+>' => 'apples/eat',
-                'DELETE apples/<id:\d+>' => 'apples/delete',
+            'rules' => [ // OPTIONS required for CORS preflight requests
+                'GET,OPTIONS apples' => 'apples/list',
+                'POST,OPTIONS apples' => 'apples/create',
+                'PATCH,OPTIONS apples/<id:\d+>/<percent:[\d\.]+>' => 'apples/eat',
+                'DELETE,OPTIONS apples/<id:\d+>' => 'apples/delete',
             ],
         ],
         'response' => [
