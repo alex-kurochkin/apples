@@ -79,12 +79,12 @@ $(document).ready(function () {
 
     $('a#createApples').on('click', function () {
         $.ajax({
-            url: 'http://api-apples.local/apples/create',
+            url: 'http://api-apples.local/apples',
             headers: {
                 'Authorization': 'Bearer ' + AccessToken,
                 'Content-Type': 'application/json'
             },
-            method: 'GET',
+            method: 'POST',
             dataType: 'json',
             data: '',
             success: function (data) {
@@ -102,6 +102,20 @@ $(document).ready(function () {
         console.log('DROP');
         let id = $(this).data('id');
         console.log(id);
+
+        $.ajax({
+            url: 'http://api-apples.local/apples/' + id,
+            headers: {
+                'Authorization': 'Bearer ' + AccessToken,
+                'Content-Type': 'application/json'
+            },
+            method: 'DELETE',
+            dataType: 'json',
+            data: '',
+            success: function (data) {
+            }
+        });
+
     });
 
     $('#applesTable').on('click', 'a.eatApple', function () {
@@ -113,7 +127,7 @@ $(document).ready(function () {
     ////////////////// LOAD TABLE /////////////////
 
     $.ajax({
-        url: 'http://api-apples.local/apples/list',
+        url: 'http://api-apples.local/apples',
         headers: {
             'Authorization': 'Bearer ' + AccessToken,
             'Content-Type': 'application/json'
