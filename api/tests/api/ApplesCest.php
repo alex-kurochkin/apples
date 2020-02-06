@@ -8,6 +8,7 @@ use api\tests\ApiTester;
 use common\fixtures\apples\AppleArFixture;
 use common\fixtures\apples\AppleColorArFixture;
 use common\fixtures\UserFixture;
+use Exception;
 
 class ApplesApiCest
 {
@@ -26,14 +27,16 @@ class ApplesApiCest
 
     /**
      * @param ApiTester $I
+     * @return int
+     * @throws Exception
      * @group ApplesAPI
      */
     public function testApplesGetApi(ApiTester $I)
     {
-        $I->wantToTest('Access to /api/apples/list');
+        $I->wantToTest('Access to GET /api/apples');
         $I->amBearerAuthenticated('tester-token');
 
-        $I->sendGET('apples/list');
+        $I->sendGET('apples');
         $I->seeResponseCodeIs(HttpCode::OK);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['result' => 'success']);
@@ -78,17 +81,16 @@ class ApplesApiCest
      * @depends testApplesGetApi
      * @param ApiTester $I
      * @group ApplesAPI
-     * @throws \Exception
+     * @throws Exception
      */
     public function testApplesCreateApi(ApiTester $I)
     {
         $countBefore = $this->testApplesGetApi($I);
 
-        $I->wantToTest('Access to /api/apples/create');
+        $I->wantToTest('Access to POST /api/apples');
         $I->amBearerAuthenticated('tester-token');
 
-
-        $I->sendGET('apples/create');
+        $I->sendPOST('apples/create');
         $I->seeResponseCodeIs(HttpCode::OK);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['result' => 'success']);
@@ -102,5 +104,32 @@ class ApplesApiCest
         $applesAfter = $I->grabDataFromResponseByJsonPath('$.data.apples')[0];
 
         $I->assertEquals($countNewApples + $countBefore, count($applesAfter));
+    }
+
+    /**
+     * @depends testApplesGetApi
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesDeleteApi(ApiTester $I)
+    {
+        $countBefore = $this->testApplesGetApi($I);
+
+        $I->wantToTest('Access to DELETE /api/apples');
+        $I->amBearerAuthenticated('tester-token');
+
+        $I->sendDELETE('apples/1');
+        $I->seeResponseCodeIs(HttpCode::OK);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['result' => 'success']);
+
+        $I->sendGET('apples/list');
+        $I->seeResponseCodeIs(HttpCode::OK);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['result' => 'success']);
+        $applesAfter = $I->grabDataFromResponseByJsonPath('$.data.apples')[0];
+
+        $I->assertEquals($countBefore - 1, count($applesAfter));
     }
 }
