@@ -3,8 +3,8 @@
 namespace common\domain\persistence\converters;
 
 use common\domain\mappers\ValueConverter;
-use DateTime;
-use DateTimeZone;
+use \DateTime;
+use \DateTimeZone;
 
 class StringToDateTimeConverter implements ValueConverter
 {

@@ -8,8 +8,15 @@ use api\tests\ApiTester;
 use common\fixtures\apples\AppleArFixture;
 use common\fixtures\apples\AppleColorArFixture;
 use common\fixtures\UserFixture;
-use Exception;
+use \ErrorException;
+use \Exception;
 
+/**
+ * Class ApplesApiCest
+ * @package tests\api
+ *
+ * PHP server and CLI timezone must be UTC
+ */
 class ApplesApiCest
 {
 
@@ -26,6 +33,35 @@ class ApplesApiCest
     }
 
     /**
+     * @depends testApplesGetApi
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesCreateApi(ApiTester $I)
+    {
+        $countBefore = $this->testApplesGetApi($I);
+
+        $I->wantToTest('to POST apple');
+        $I->amBearerAuthenticated('tester-token');
+
+        $I->sendPOST('apples');
+        $I->seeResponseCodeIs(HttpCode::OK);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['result' => 'success']);
+
+        $countNewApples = $I->grabDataFromResponseByJsonPath('$.data')[0];
+
+        $I->sendGET('apples');
+        $I->seeResponseCodeIs(HttpCode::OK);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['result' => 'success']);
+        $applesAfter = $I->grabDataFromResponseByJsonPath('$.data.apples')[0];
+
+        $I->assertEquals($countNewApples + $countBefore, count($applesAfter));
+    }
+
+    /**
      * @param ApiTester $I
      * @return int
      * @throws Exception
@@ -33,7 +69,7 @@ class ApplesApiCest
      */
     public function testApplesGetApi(ApiTester $I)
     {
-        $I->wantToTest('Access to GET /api/apples');
+        $I->wantToTest('to GET apples');
         $I->amBearerAuthenticated('tester-token');
 
         $I->sendGET('apples');
@@ -48,16 +84,22 @@ class ApplesApiCest
                         [
                             'id' => 1,
                             'colorId' => 1,
-                            'eatenPercent' => 0.25,
-                            'createdAt' => '2020-01-05T12:20:33+00:00',
-                            'fallenAt' => '2020-01-20T14:45:12+00:00',
+                            'eatenPercent' => 0,
                         ],
                         [
                             'id' => 2,
                             'colorId' => 2,
+                            'eatenPercent' => 0.5,
+                        ],
+                        [
+                            'id' => 3,
+                            'colorId' => 2,
                             'eatenPercent' => 0,
-                            'createdAt' => '2020-01-07T12:21:37+00:00',
-                            'fallenAt' => null,
+                        ],
+                        [
+                            'id' => 4,
+                            'colorId' => 1,
+                            'eatenPercent' => 0,
                         ],
                     ],
                     'appleColors' => [
@@ -83,40 +125,11 @@ class ApplesApiCest
      * @group ApplesAPI
      * @throws Exception
      */
-    public function testApplesCreateApi(ApiTester $I)
-    {
-        $countBefore = $this->testApplesGetApi($I);
-
-        $I->wantToTest('Access to POST /api/apples');
-        $I->amBearerAuthenticated('tester-token');
-
-        $I->sendPOST('apples/create');
-        $I->seeResponseCodeIs(HttpCode::OK);
-        $I->seeResponseIsJson();
-        $I->seeResponseContainsJson(['result' => 'success']);
-
-        $countNewApples = $I->grabDataFromResponseByJsonPath('$.data')[0];
-
-        $I->sendGET('apples/list');
-        $I->seeResponseCodeIs(HttpCode::OK);
-        $I->seeResponseIsJson();
-        $I->seeResponseContainsJson(['result' => 'success']);
-        $applesAfter = $I->grabDataFromResponseByJsonPath('$.data.apples')[0];
-
-        $I->assertEquals($countNewApples + $countBefore, count($applesAfter));
-    }
-
-    /**
-     * @depends testApplesGetApi
-     * @param ApiTester $I
-     * @group ApplesAPI
-     * @throws Exception
-     */
     public function testApplesDeleteApi(ApiTester $I)
     {
         $countBefore = $this->testApplesGetApi($I);
 
-        $I->wantToTest('Access to DELETE /api/apples');
+        $I->wantToTest('to DELETE apple');
         $I->amBearerAuthenticated('tester-token');
 
         $I->sendDELETE('apples/1');
@@ -124,12 +137,171 @@ class ApplesApiCest
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['result' => 'success']);
 
-        $I->sendGET('apples/list');
+        $I->sendGET('apples');
         $I->seeResponseCodeIs(HttpCode::OK);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['result' => 'success']);
         $applesAfter = $I->grabDataFromResponseByJsonPath('$.data.apples')[0];
 
         $I->assertEquals($countBefore - 1, count($applesAfter));
+    }
+
+    /**
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesEatApi(ApiTester $I)
+    {
+        $I->wantToTest('to UPDATE apple');
+        $I->amBearerAuthenticated('tester-token');
+
+        $appleId = 2;
+        $eatPercent = 0.15;
+
+        $percentBefore = $this->getEatenPercent($I, $appleId);
+
+        $I->sendPATCH('apples/' . $appleId . '/' . $eatPercent);
+        $I->seeResponseCodeIs(HttpCode::OK);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['result' => 'success']);
+
+        $percentAfter = $this->getEatenPercent($I, $appleId);
+
+        $I->assertEquals($percentBefore + $eatPercent, $percentAfter);
+    }
+
+    /**
+     * @param ApiTester $I
+     * @param int $appleId
+     * @return float
+     * @throws ErrorException
+     * @throws Exception
+     */
+    private function getEatenPercent(ApiTester $I, int $appleId): float
+    {
+        $I->sendGET('apples');
+        $I->seeResponseCodeIs(HttpCode::OK);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['result' => 'success']);
+
+        $apples = $I->grabDataFromResponseByJsonPath('$.data.apples')[0];
+
+//        var_dump($apples);die;
+
+        return $this->findEatenPercent($apples, $appleId);
+    }
+
+    /**
+     * @param array $apples
+     * @param int $appleId
+     * @return float
+     * @throws ErrorException
+     */
+    private function findEatenPercent(array $apples, int $appleId): float
+    {
+        foreach ($apples as $apple) {
+            $apple = (object)$apple;
+            if ($appleId === $apple->id) {
+                return $apple->eatenPercent;
+            }
+        }
+
+        throw new ErrorException('Apple with id' . $appleId . ' not found');
+    }
+
+    /**
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesEatZeroPercentsApi(ApiTester $I)
+    {
+        $I->wantToTest('to UPDATE apple try to lick');
+        $I->amBearerAuthenticated('tester-token');
+
+        $appleId = 1;
+        $eatPercent = 0; // <--- Try to lick )))
+
+        $I->sendPATCH('apples/' . $appleId . '/' . $eatPercent);
+        $I->seeResponseCodeIs(HttpCode::OK);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['result' => 'success']);
+    }
+
+    /**
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesEatByteMore100PercentsApi(ApiTester $I)
+    {
+        $I->wantToTest('to UPDATE apple to byte more then 100%');
+        $I->amBearerAuthenticated('tester-token');
+
+        $appleId = 1;
+        $eatPercent = 1.15;
+
+        $I->sendPATCH('apples/' . $appleId . '/' . $eatPercent);
+        $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['message' => 'Eaten Percent must be no greater than 1.']);
+    }
+
+    /**
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesEatMore100PercentApi(ApiTester $I)
+    {
+        $I->wantToTest('to UPDATE apple try to eat summary more than !00%');
+        $I->amBearerAuthenticated('tester-token');
+
+        $appleId = 2;
+        $eatPercent = 0.6; // 0.5 + 0.6 = 1.1
+
+        $I->sendPATCH('apples/' . $appleId . '/' . $eatPercent);
+        $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['message' => 'You are trying to bite off more than the remaining apple']);
+    }
+
+    /**
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesEatUnripeApi(ApiTester $I)
+    {
+        $I->wantToTest('to UPDATE unripe apple');
+        $I->amBearerAuthenticated('tester-token');
+
+        $appleId = 3;
+        $eatPercent = 0.1;
+
+        $I->sendPATCH('apples/' . $appleId . '/' . $eatPercent);
+        $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['message' => 'This apple is unripe yet']);
+    }
+
+    /**
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesEatRottenApi(ApiTester $I)
+    {
+        $I->wantToTest('to UPDATE rotten apple');
+        $I->amBearerAuthenticated('tester-token');
+
+        $appleId = 4;
+        $eatPercent = 0.1;
+
+        $I->sendPATCH('apples/' . $appleId . '/' . $eatPercent);
+        $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['message' => 'This apple has already rotted']);
     }
 }
