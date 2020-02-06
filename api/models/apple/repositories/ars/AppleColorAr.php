@@ -3,17 +3,17 @@ declare(strict_types=1);
 
 namespace api\models\apple\repositories\ars;
 
-use yii\db\ActiveRecord;
+use common\domain\persistence\BaseAr;
 
 /**
  * Class AppleColorAr
  * @package api\models\repositories\ars
  *
- * @property $id
- * @property $user_id
- * @property $color
+ * @property int $id
+ * @property int $user_id
+ * @property string $color
  */
-class AppleColorAr extends ActiveRecord
+class AppleColorAr extends BaseAr
 {
 
     const ID = 'id';
@@ -23,9 +23,9 @@ class AppleColorAr extends ActiveRecord
     const COLOR = 'color';
 
     const MAPPING = [
-        'id' => 'id',
-        'user_id' => ['userId', 'int'],
-        'color' => 'color',
+        self::ID => 'id',
+        self::USER_ID => ['userId', 'int'],
+        self::COLOR => 'color',
     ];
 
     /** @inheritdoc */

@@ -10,6 +10,8 @@ class Apple
 
     const ID = 'id';
 
+    const USER_ID = 'userId';
+
     /**
      * @var int
      */

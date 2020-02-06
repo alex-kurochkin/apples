@@ -4,6 +4,7 @@ namespace api\models;
 
 use common\domain\utils\Arrays;
 use Sentry\State\Hub;
+use Throwable;
 
 class Sentry
 {
@@ -11,7 +12,7 @@ class Sentry
     /** @var string[] */
     private static $ignored = [];
 
-    public static function ignore(string... $exceptionClasses)
+    public static function ignore(string...$exceptionClasses)
     {
         self::$ignored[] = Arrays::merge(self::$ignored, $exceptionClasses);
     }
@@ -22,7 +23,7 @@ class Sentry
         return !$testOrDev;
     }
 
-    public static function captureException(\Throwable $exception)
+    public static function captureException(Throwable $exception)
     {
         if (!self::isAllowed()) {
             return;
@@ -35,7 +36,7 @@ class Sentry
         Hub::getCurrent()->captureException($exception);
     }
 
-    private static function isIgnored(\Throwable $exception): bool
+    private static function isIgnored(Throwable $exception): bool
     {
         $exceptionClass = get_class($exception);
 

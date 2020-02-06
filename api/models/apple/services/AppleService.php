@@ -64,4 +64,10 @@ class AppleService
 
         $this->appleRepository->createMany($apples);
     }
+
+    public function deleteOne($userId, $appleId)
+    {
+        $model = $this->appleRepository->findOneByIdAndUserId($appleId, $userId);
+        $this->appleRepository->deleteOne($model);
+    }
 }

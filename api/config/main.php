@@ -1,4 +1,8 @@
 <?php
+
+use common\components\Response;
+use common\components\ServiceRoute;
+
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
     require __DIR__ . '/../../common/config/params-local.php',
@@ -14,6 +18,13 @@ return [
     'modules' => [],
     'components' => [
         'request' => [
+            'class' => \common\components\Request::class,
+            'cookieValidationKey' => 'Mj5RhfOP2KbMvyA_XbitIHjJHhJP56D',
+            'enableCsrfValidation' => false,
+            'enableCsrfCookie' => false,
+            'parsers' => [
+                'application/json' => yii\web\JsonParser::class,
+            ],
             'csrfParam' => '_csrf-api',
         ],
         'user' => [
@@ -42,22 +53,19 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                'OPTIONS apples' => 'apples/options', // URL for CORS
+                'OPTIONS apples/<id:\d+>' => 'apples/options', // URL for CORS
+                'GET apples' => 'apples/list',
+                'POST apples' => 'apples/create',
+                'PATCH apples/<id:\d+>/<percent:\d+>' => 'apples/eat',
+                'DELETE apples/<id:\d+>' => 'apples/delete',
             ],
         ],
-        'request' => [
-            'class' => \common\components\Request::class,
-            'cookieValidationKey' => 'Mj5RhpVD2KbMvyA_XbitIBGaGmxBP56D',
-            'enableCsrfValidation' => false,
-            'enableCsrfCookie' => false,
-            'parsers' => [
-                'application/json' => yii\web\JsonParser::class,
-            ]
-        ],
         'response' => [
-            'class' => \common\components\Response::class,
+            'class' => Response::class,
         ],
         'service' => [
-            'class' => \common\components\ServiceRoute::class,
+            'class' => ServiceRoute::class,
             'services' => [],
         ],
         'formatter' => [

@@ -3,20 +3,20 @@ declare(strict_types=1);
 
 namespace api\models\apple\repositories\ars;
 
-use yii\db\ActiveRecord;
+use common\domain\persistence\BaseAr;
 
 /**
  * Class AppleAr
  * @package api\models\repositories\ars
  *
- * @property $id
- * @property $user_id
- * @property $color_id
- * @property $created_at
- * @property $fallen_at
- * @property $eaten_percent
+ * @property int $id
+ * @property int $user_id
+ * @property int $color_id
+ * @property string $created_at (DateTime)
+ * @property string $fallen_at (DateTime)
+ * @property float $eaten_percent
  */
-class AppleAr extends ActiveRecord
+class AppleAr extends BaseAr
 {
 
     const ID = 'id';
@@ -26,9 +26,9 @@ class AppleAr extends ActiveRecord
     const COLOR_ID = 'color_id';
 
     const MAPPING = [
-        'id' => 'id',
-        'user_id' => ['userId', 'int'],
-        'color_id' => ['colorId', 'int'],
+        self::ID => ['id', 'int'],
+        self::USER_ID => ['userId', 'int'],
+        self::COLOR_ID => ['colorId', 'int'],
         'eaten_percent' => 'eatenPercent',
         'created_at' => ['createdAt', 'datetime', false],
         'fallen_at' => ['fallenAt', 'datetime', false],
