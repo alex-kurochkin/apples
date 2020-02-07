@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace api\controllers\actions\apples;
 
-use api\common\AppConfig;
-use api\common\AppContext;
+use common\domain\AppConfig;
+use common\domain\AppContext;
 use api\controllers\actions\apples\dtos\AppleColorDto;
 use api\controllers\actions\apples\dtos\AppleDto;
 use api\controllers\actions\apples\dtos\ApplesDto;

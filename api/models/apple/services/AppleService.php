@@ -5,6 +5,7 @@ namespace api\models\apple\services;
 
 use api\models\apple\Apple;
 use api\models\apple\repositories\AppleRepository;
+use common\domain\persistence\exceptions\EntityNotFoundException;
 use common\domain\utils\ObjectArrays;
 use yii\base\InvalidConfigException;
 
@@ -42,6 +43,17 @@ class AppleService
     }
 
     /**
+     * @param int $appleId
+     * @param int $userId
+     * @return Apple
+     * @throws InvalidConfigException
+     */
+    public function findOneByIdAndUserId(int $appleId, int $userId): Apple
+    {
+        return $this->appleRepository->findOneByIdAndUserId($appleId, $userId);
+    }
+
+    /**
      * @param int $userId
      * @param int $count
      * @throws InvalidConfigException
@@ -63,6 +75,15 @@ class AppleService
         }
 
         $this->appleRepository->createMany($apples);
+    }
+
+    /**
+     * @param Apple $apple
+     * @return Apple
+     */
+    public function updateOne(Apple $apple): Apple
+    {
+        return $this->appleRepository->updateOne($apple);
     }
 
     public function deleteOne($userId, $appleId)

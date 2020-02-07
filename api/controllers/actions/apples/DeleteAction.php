@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace api\controllers\actions\apples;
 
-use api\common\AppContext;
+use common\domain\AppContext;
 use api\models\apple\services\AppleService;
 use common\controllers\dtos\ObjectResponseDto;
 use yii\base\Action;

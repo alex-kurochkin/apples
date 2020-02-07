@@ -5,8 +5,10 @@ namespace api\controllers;
 
 use api\controllers\actions\apples\CreateAction;
 use api\controllers\actions\apples\DeleteAction;
+use api\controllers\actions\apples\EatAction;
 use api\controllers\actions\apples\ListAction;
 use common\components\RestController;
+use common\domain\AppConfig;
 use yii\filters\auth\HttpBearerAuth;
 use yii\filters\Cors;
 use yii\filters\VerbFilter;
@@ -32,8 +34,8 @@ class ApplesController extends RestController
         $behaviors['corsFilter'] = [
             'class' => Cors::class,
             'cors' => [
-                'Origin' => ['http://apples.local'],
-                'Access-Control-Request-Methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+                'Origin' => [AppConfig::getCorsOrigin()],
+                'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
                 'Access-Control-Request-Headers' => ['Content-Type', 'Authorization'],
                 'Access-Control-Allow-Credentials' => true,
                 'Access-Control-Max-Age' => 3600,
@@ -64,9 +66,6 @@ class ApplesController extends RestController
             'error' => [
                 'class' => ErrorAction::class,
             ],
-//            'options' => [
-//                'class' => ListAction::class,
-//            ],
             'list' => [
                 'class' => ListAction::class,
             ],
@@ -76,14 +75,9 @@ class ApplesController extends RestController
             'delete' => [
                 'class' => DeleteAction::class,
             ],
-//            'eat' => [
-//                'class' => EatAction::class,
-//            ],
+            'eat' => [
+                'class' => EatAction::class,
+            ],
         ];
-    }
-
-    public function optionsAction()
-    {
-        return '';
     }
 }

@@ -46,7 +46,7 @@ class AppleRepository extends BaseRepository
      * @return Apple|null
      * @throws InvalidConfigException
      */
-    public function findOneByUserIdAndIdOrNull(int $appleId, int $userId): ?Apple
+    public function findOneByIdAndUserIdOrNull(int $appleId, int $userId): ?Apple
     {
         return $this->findOneOrNull(function (ActiveQuery $query) use ($appleId, $userId) {
             $query->where([
@@ -59,12 +59,12 @@ class AppleRepository extends BaseRepository
     /**
      * @param int $appleId
      * @param int $userId
-     * @return Apple|null
+     * @return Apple
      * @throws InvalidConfigException
      */
-    public function findOneByIdAndUserId(int $appleId, int $userId): ?Apple
+    public function findOneByIdAndUserId(int $appleId, int $userId): Apple
     {
-        $model = $this->findOneByUserIdAndIdOrNull($appleId, $userId);
+        $model = $this->findOneByIdAndUserIdOrNull($appleId, $userId);
 
         if (null === $model) {
             throw new EntityNotFoundException($this->getModelType(), $appleId, $userId);

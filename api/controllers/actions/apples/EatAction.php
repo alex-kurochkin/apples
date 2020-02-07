@@ -4,13 +4,18 @@ declare(strict_types=1);
 namespace api\controllers\actions\apples;
 
 use common\domain\AppContext;
+use api\controllers\actions\apples\params\EatParams;
 use api\models\apple\services\AppleService;
+use api\models\apple\utils\Apples;
 use common\controllers\dtos\ObjectResponseDto;
+use common\domain\utils\ErrorMessageBuilder;
+use LogicException;
 use yii\base\Action;
 use yii\base\Controller;
 use yii\base\InvalidConfigException;
+use yii\web\BadRequestHttpException;
 
-class CreateAction extends Action
+class EatAction extends Action
 {
 
     /**
@@ -45,15 +50,32 @@ class CreateAction extends Action
     }
 
     /**
+     * @param int $id
+     * @param float $percent
      * @return ObjectResponseDto
+     * @throws BadRequestHttpException
      * @throws InvalidConfigException
+     * @throws LogicException
      */
-    public function run()
+    public function run(int $id, float $percent)
     {
-        $count = rand(4, 10);
-        $userId = $this->appContext->getUserId();
-        $this->appleService->createMany($userId, $count);
+        $params = new EatParams();
 
-        return new ObjectResponseDto($count);
+        $params->load(['eatenPercent' => $percent]);
+        if (!$params->validate()) {
+            throw new BadRequestHttpException(ErrorMessageBuilder::build($params->errors));
+        }
+
+        $userId = $this->appContext->getUserId();
+
+        $apple = $this->appleService->findOneByIdAndUserId($id, $userId);
+
+        Apples::checkEatPossibility($apple, $percent);
+
+        $apple->eatenPercent += $percent;
+
+        $this->appleService->updateOne($apple);
+
+        return new ObjectResponseDto([$id, $percent, $apple]);
     }
 }
