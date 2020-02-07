@@ -8,6 +8,7 @@ use api\models\apple\services\AppleService;
 use common\controllers\dtos\ObjectResponseDto;
 use yii\base\Action;
 use yii\base\Controller;
+use yii\web\BadRequestHttpException;
 
 class DeleteAction extends Action
 {
@@ -44,14 +45,19 @@ class DeleteAction extends Action
     }
 
     /**
-     * @param $id
+     * @param int $id
      * @return ObjectResponseDto
+     * @throws BadRequestHttpException
      */
     public function run(int $id)
     {
         $userId = $this->appContext->getUserId();
 
-        $this->appleService->deleteOne($userId, $id);
+        try {
+            $this->appleService->deleteOne($userId, $id);
+        } catch (\Exception $e) {
+            throw new BadRequestHttpException($e->getMessage());
+        }
 
         return new ObjectResponseDto(time());
     }

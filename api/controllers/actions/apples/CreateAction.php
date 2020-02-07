@@ -8,7 +8,7 @@ use api\models\apple\services\AppleService;
 use common\controllers\dtos\ObjectResponseDto;
 use yii\base\Action;
 use yii\base\Controller;
-use yii\base\InvalidConfigException;
+use yii\web\BadRequestHttpException;
 
 class CreateAction extends Action
 {
@@ -46,13 +46,18 @@ class CreateAction extends Action
 
     /**
      * @return ObjectResponseDto
-     * @throws InvalidConfigException
+     * @throws BadRequestHttpException
      */
     public function run()
     {
         $count = rand(4, 10);
         $userId = $this->appContext->getUserId();
-        $this->appleService->createMany($userId, $count);
+
+        try {
+            $this->appleService->createMany($userId, $count);
+        } catch (\Exception $e) {
+            throw new BadRequestHttpException($e->getMessage());
+        }
 
         return new ObjectResponseDto($count);
     }

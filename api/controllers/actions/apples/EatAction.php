@@ -54,7 +54,6 @@ class EatAction extends Action
      * @param float $percent
      * @return ObjectResponseDto
      * @throws BadRequestHttpException
-     * @throws InvalidConfigException
      * @throws LogicException
      */
     public function run(int $id, float $percent)
@@ -68,13 +67,17 @@ class EatAction extends Action
 
         $userId = $this->appContext->getUserId();
 
-        $apple = $this->appleService->findOneByIdAndUserId($id, $userId);
+        try {
+            $apple = $this->appleService->findOneByIdAndUserId($id, $userId);
 
-        Apples::checkEatPossibility($apple, $percent);
+            Apples::checkEatPossibility($apple, $percent);
 
-        $apple->eatenPercent += $percent;
+            $apple->eatenPercent += $percent;
 
-        $this->appleService->updateOne($apple);
+            $this->appleService->updateOne($apple);
+        } catch (\Exception $e) {
+            throw new BadRequestHttpException($e->getMessage());
+        }
 
         return new ObjectResponseDto([$id, $percent, $apple]);
     }

@@ -33,6 +33,21 @@ class ApplesApiCest
     }
 
     /**
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesUnauthorizedAccessApi(ApiTester $I)
+    {
+        $I->wantToTest('to unauthorized access');
+
+        $I->sendGET('apples');
+        $I->seeResponseCodeIs(HttpCode::UNAUTHORIZED);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['message' => 'Your request was made with invalid credentials.']);
+    }
+
+    /**
      * @depends testApplesGetApi
      * @param ApiTester $I
      * @group ApplesAPI
@@ -42,7 +57,7 @@ class ApplesApiCest
     {
         $countBefore = $this->testApplesGetApi($I);
 
-        $I->wantToTest('to POST apple');
+        $I->wantToTest('to CREATE apples');
         $I->amBearerAuthenticated('tester-token');
 
         $I->sendPOST('apples');
@@ -69,7 +84,7 @@ class ApplesApiCest
      */
     public function testApplesGetApi(ApiTester $I)
     {
-        $I->wantToTest('to GET apples');
+        $I->wantToTest('to GET list apples');
         $I->amBearerAuthenticated('tester-token');
 
         $I->sendGET('apples');
@@ -117,6 +132,22 @@ class ApplesApiCest
 
         $applesBefore = $I->grabDataFromResponseByJsonPath('$.data.apples')[0];
         return count($applesBefore);
+    }
+
+    /**
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesDeleteUncreatedApi(ApiTester $I)
+    {
+        $I->wantToTest('to DELETE uncreated apple');
+        $I->amBearerAuthenticated('tester-token');
+
+        $I->sendDELETE('apples/100');
+        $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['message' => 'Not found.']);
     }
 
     /**
@@ -221,12 +252,31 @@ class ApplesApiCest
         $I->amBearerAuthenticated('tester-token');
 
         $appleId = 1;
-        $eatPercent = 0; // <--- Try to lick )))
+        $eatPercent = 0; // <--- Try to lick, it's possible. Why not? )))
 
         $I->sendPATCH('apples/' . $appleId . '/' . $eatPercent);
         $I->seeResponseCodeIs(HttpCode::OK);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['result' => 'success']);
+    }
+
+    /**
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesEatUncreatedApi(ApiTester $I)
+    {
+        $I->wantToTest('to UPDATE uncreated apple');
+        $I->amBearerAuthenticated('tester-token');
+
+        $appleId = 100;
+        $eatPercent = 0.1;
+
+        $I->sendPATCH('apples/' . $appleId . '/' . $eatPercent);
+        $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['message' => 'Not found.']);
     }
 
     /**
@@ -255,7 +305,7 @@ class ApplesApiCest
      */
     public function testApplesEatMore100PercentApi(ApiTester $I)
     {
-        $I->wantToTest('to UPDATE apple try to eat summary more than !00%');
+        $I->wantToTest('to UPDATE apple try to eat summary more than 100%');
         $I->amBearerAuthenticated('tester-token');
 
         $appleId = 2;
