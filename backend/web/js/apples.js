@@ -90,6 +90,9 @@ const Apples = function () {
                         freshDuration = data.data.freshDuration; // hours
 
                     AppleList.load(apples, appleColors, freshDuration);
+                },
+                error: function (jqXHR) {
+                    alert(jqXHR.responseJSON.message);
                 }
             });
         }
@@ -135,6 +138,9 @@ $(document).ready(function () {
             data: '',
             success: function (data) {
                 Apples.load();
+            },
+            error: function (jqXHR) {
+                alert(jqXHR.responseJSON.message);
             }
         });
     });
@@ -153,6 +159,9 @@ $(document).ready(function () {
             data: '',
             success: function (data) {
                 AppleList.setFallDT(id, data.data);
+            },
+            error: function (jqXHR) {
+                alert(jqXHR.responseJSON.message);
             }
         });
     });
@@ -171,13 +180,16 @@ $(document).ready(function () {
             data: '',
             success: function (data) {
                 Apples.load();
+            },
+            error: function (jqXHR) {
+                alert(jqXHR.responseJSON.message);
             }
         });
     });
 
     //// EAT APPLE ////
     $('#applesTable').on('click', 'a.eatApple', function () {
-        console.log('DROP');
+        console.log('EAT');
         let id = $(this).data('id');
         console.log(id);
     });
