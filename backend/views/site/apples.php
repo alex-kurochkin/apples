@@ -10,13 +10,13 @@ APPLES
             <th>Fall</th>
             <th>Fallen</th>
             <th>State</th>
-            <th>Eat it</th>
-            <th>Eaten %</th>
-            <th>Drop it</th>
+            <th>Eat</th>
+            <th>Eaten</th>
+            <th>Drop</th>
         </thead>
         <tbody id="apples-list"></tbody>
     </table>
 </div>
 <script>
-    let AccessToken = '<?= Yii::$app->user->identity->access_token; ?>';
+    let AccessToken = <?= json_encode(Yii::$app->user->identity->access_token, JSON_HEX_TAG); ?>;
 </script>

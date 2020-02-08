@@ -4,6 +4,7 @@
  */
 const detectAppleState = function (state) {
     'use strict';
+
     switch (state) {
         case 1:
             return 'fresh';
@@ -24,6 +25,7 @@ const detectAppleState = function (state) {
  */
 const calculateFresh = function (fallenDT, freshDuration) {
     'use strict';
+
     let freshDurationSeconds = freshDuration * 60 * 60,
         currentDateTime = new Date(),
         dtDiff = currentDateTime.getTime() - fallenDT.getTime();
@@ -33,6 +35,7 @@ const calculateFresh = function (fallenDT, freshDuration) {
 
 const AppleList = function () {
     'use strict';
+
     let applesList = $('#apples-list');
     return {
         load: function(apples, appleColors, freshDuration) {
@@ -60,10 +63,16 @@ const AppleList = function () {
                 '<td><a href="javascript:void(0);" class="fallApple" data-id="' + apple.id + '">' + 'Fall it' + '</a></td>' +
                 '<td id="fallenAt' + apple.id + '">' + (apple.fallenAt ? apple.fallenAt : '') + '</td>' +
                 '<td>' + detectAppleState(apple.state) + '</td>' +
-                '<td>' + 'apple.eatIt' + '</td>' +
-                '<td>' + apple.eatenPercent + '</td>' +
+                '<td><a href="javascript:void(0);" class="eatApple" data-id="' + apple.id + '">' + 'Eat' + '</a> <input id="eatPercent' + apple.id + '" type="number" step="0.1" min="0" max="1" value="0" /></td>' +
+                '<td id="eatenPercent' + apple.id + '">' + apple.eatenPercent + '</td>' +
                 '<td><a href="javascript:void(0);" class="dropApple" data-id="' + apple.id + '">' + 'Drop it' + '</a></td>' +
                 '</tr>');
+        },
+        getEatPercent: function (id) {
+            return $('input#eatPercent' + id, applesList).val();
+        },
+        setEatenPercent: function (id, percent) {
+            $('td#eatenPercent' + id, applesList).text(percent.toFixed(1));
         },
         setFallDT: function (id, dt) {
             $('td#fallenAt' + id, applesList).text(dt);
@@ -72,6 +81,7 @@ const AppleList = function () {
 }();
 
 const Apples = function () {
+    'use strict';
 
     return {
         load: function () {
@@ -101,6 +111,7 @@ const Apples = function () {
 
 const AppleColors = function () {
     'use strict';
+
     let colors = [];
     return {
         load: function (appleColors) {
@@ -138,6 +149,7 @@ $(document).ready(function () {
             data: '',
             success: function (data) {
                 Apples.load();
+                alert('Added ' + data.data + ' apples');
             },
             error: function (jqXHR) {
                 alert(jqXHR.responseJSON.message);
@@ -178,7 +190,7 @@ $(document).ready(function () {
             method: 'DELETE',
             dataType: 'json',
             data: '',
-            success: function (data) {
+            success: function () {
                 Apples.load();
             },
             error: function (jqXHR) {
@@ -189,12 +201,31 @@ $(document).ready(function () {
 
     //// EAT APPLE ////
     $('#applesTable').on('click', 'a.eatApple', function () {
-        console.log('EAT');
-        let id = $(this).data('id');
-        console.log(id);
+        let id = $(this).data('id'),
+            eatPercent = parseFloat(AppleList.getEatPercent(id));
+
+        if(0.0 === eatPercent) {
+            alert('You wanna leak apple? Yes, it\'s possible! )');
+        }
+
+        $.ajax({
+            url: 'http://api-apples.local/apples/' + id + '/' + eatPercent,
+            headers: {
+                'Authorization': 'Bearer ' + AccessToken,
+                'Content-Type': 'application/json'
+            },
+            method: 'PATCH',
+            dataType: 'json',
+            data: '',
+            success: function (data) {
+                AppleList.setEatenPercent(id, data.data);
+            },
+            error: function (jqXHR) {
+                alert(jqXHR.responseJSON.message);
+            }
+        });
     });
 
-    ////////////////// LOAD TABLE /////////////////
-
+    //// LOAD TABLE ////
     Apples.load();
 });
