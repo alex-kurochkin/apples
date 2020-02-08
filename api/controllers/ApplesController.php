@@ -76,11 +76,11 @@ class ApplesController extends RestController
             'fall' => [
                 'class' => FallAction::class,
             ],
-            'delete' => [
-                'class' => DeleteAction::class,
-            ],
             'eat' => [
                 'class' => EatAction::class,
+            ],
+            'delete' => [
+                'class' => DeleteAction::class,
             ],
         ];
     }

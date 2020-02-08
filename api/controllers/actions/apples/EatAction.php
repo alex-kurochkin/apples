@@ -79,6 +79,6 @@ class EatAction extends Action
             throw new BadRequestHttpException($e->getMessage());
         }
 
-        return new ObjectResponseDto();
+        return new ObjectResponseDto($apple->eatenPercent);
     }
 }
