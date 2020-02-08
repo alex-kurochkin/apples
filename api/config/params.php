@@ -1,6 +1,6 @@
 <?php
 return [
     'adminEmail' => 'admin@example.com',
-    'CorsOrigin' => 'http://apples.local',
+    'CorsOrigin' => 'http://back-apples.local',
     'appleFreshDuration' => 5, // hours
 ];

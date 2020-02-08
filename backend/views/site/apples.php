@@ -21,9 +21,3 @@ AccessToken: <?= Yii::$app->user->identity->access_token; ?>
 <script>
     let AccessToken = '<?= Yii::$app->user->identity->access_token; ?>';
 </script>
-<style>
-    table td:nth-child(2),
-    table td:nth-child(6) {
-        text-transform: capitalize;
-    }
-</style>

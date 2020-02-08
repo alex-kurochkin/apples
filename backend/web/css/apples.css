@@ -5,3 +5,8 @@ table > thead > tr > th {
 table > tbody > tr > td {
     padding: 10px;
 }
+
+table td:nth-child(2),
+table td:nth-child(6) {
+    text-transform: capitalize;
+}
