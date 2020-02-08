@@ -61,6 +61,7 @@ class DateTimes
      *
      * @param int $unixTimestamp
      * @return DateTime|null
+     * @throws \Exception
      */
     public static function fromUnixTimestamp(int $unixTimestamp): DateTime
     {
@@ -92,6 +93,7 @@ class DateTimes
     /**
      * @param int $minutes
      * @return DateTime
+     * @throws \Exception
      */
     public static function nowPlusMinutes(int $minutes = 0): DateTime
     {

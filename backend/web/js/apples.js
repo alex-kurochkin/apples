@@ -35,20 +35,65 @@ const AppleList = function () {
     'use strict';
     let applesList = $('#apples-list');
     return {
-        load: function (apple) {
+        load: function(apples, appleColors, freshDuration) {
+            AppleColors.load(appleColors);
+
+            applesList.empty();
+
+            $.each(apples, function (index, apple) {
+                apple.color = AppleColors.get(apple.colorId);
+                apple.state = null;
+
+                if (apple.fallenAt) {
+                    // fallenAt {string} Date&Time ISO 8601
+                    apple.state = calculateFresh(new Date(apple.fallenAt), freshDuration);
+                }
+
+                AppleList.loadApple(apple);
+            });
+        },
+        loadApple: function (apple) {
             applesList.append('<tr id="' + apple.id + '">' +
                 '<td>' + apple.id + '</td>' +
                 '<td>' + apple.color + '</td>' +
                 '<td>' + apple.createdAt + '</td>' +
                 '<td><a href="javascript:void(0);" class="fallApple" data-id="' + apple.id + '">' + 'Fall it' + '</a></td>' +
-                '<td>' + apple.fallenAt + '</td>' +
+                '<td id="fallenAt' + apple.id + '">' + (apple.fallenAt ? apple.fallenAt : '') + '</td>' +
                 '<td>' + detectAppleState(apple.state) + '</td>' +
                 '<td>' + 'apple.eatIt' + '</td>' +
                 '<td>' + apple.eatenPercent + '</td>' +
                 '<td><a href="javascript:void(0);" class="dropApple" data-id="' + apple.id + '">' + 'Drop it' + '</a></td>' +
                 '</tr>');
+        },
+        setFallDT: function (id, dt) {
+            $('td#fallenAt' + id, applesList).text(dt);
         }
     }
+}();
+
+const Apples = function () {
+
+    return {
+        load: function () {
+            $.ajax({
+                url: 'http://api-apples.local/apples',
+                headers: {
+                    'Authorization': 'Bearer ' + AccessToken,
+                    'Content-Type': 'application/json'
+                },
+                method: 'GET',
+                dataType: 'json',
+                data: '',
+                success: function (data) {
+                    let apples = data.data.apples,
+                        appleColors = data.data.appleColors,
+                        freshDuration = data.data.freshDuration; // hours
+
+                    AppleList.load(apples, appleColors, freshDuration);
+                }
+            });
+        }
+    };
 }();
 
 const AppleColors = function () {
@@ -77,6 +122,7 @@ const AppleColors = function () {
 $(document).ready(function () {
     'use strict';
 
+    //// CREATE APPLE ////
     $('a#createApples').on('click', function () {
         $.ajax({
             url: 'http://api-apples.local/apples',
@@ -88,21 +134,32 @@ $(document).ready(function () {
             dataType: 'json',
             data: '',
             success: function (data) {
+                Apples.load();
             }
         });
     });
 
+    //// FALL APPLE ////
     $('#applesTable').on('click', 'a.fallApple', function () {
-        console.log('FALL');
         let id = $(this).data('id');
-        console.log(id);
+        $.ajax({
+            url: 'http://api-apples.local/apples/' + id,
+            headers: {
+                'Authorization': 'Bearer ' + AccessToken,
+                'Content-Type': 'application/json'
+            },
+            method: 'PATCH',
+            dataType: 'json',
+            data: '',
+            success: function (data) {
+                AppleList.setFallDT(id, data.data);
+            }
+        });
     });
 
+    //// DELETE APPLE ////
     $('#applesTable').on('click', 'a.dropApple', function () {
-        console.log('DROP');
         let id = $(this).data('id');
-        console.log(id);
-
         $.ajax({
             url: 'http://api-apples.local/apples/' + id,
             headers: {
@@ -113,11 +170,12 @@ $(document).ready(function () {
             dataType: 'json',
             data: '',
             success: function (data) {
+                Apples.load();
             }
         });
-
     });
 
+    //// EAT APPLE ////
     $('#applesTable').on('click', 'a.eatApple', function () {
         console.log('DROP');
         let id = $(this).data('id');
@@ -126,34 +184,5 @@ $(document).ready(function () {
 
     ////////////////// LOAD TABLE /////////////////
 
-    $.ajax({
-        url: 'http://api-apples.local/apples',
-        headers: {
-            'Authorization': 'Bearer ' + AccessToken,
-            'Content-Type': 'application/json'
-        },
-        method: 'GET',
-        dataType: 'json',
-        data: '',
-        success: function (data) {
-            let apples = data.data.apples,
-                appleColors = data.data.appleColors,
-                freshDuration = data.data.freshDuration; // hours
-
-            AppleColors.load(appleColors);
-
-            $.each(apples, function (index, apple) {
-                apple.color = AppleColors.get(apple.colorId);
-                apple.state = null;
-
-                if (apple.fallenAt) {
-                    // fallenAt {string} Date&Time ISO 8601
-                    apple.state = calculateFresh(new Date(apple.fallenAt), freshDuration);
-                }
-
-                // console.log(apple);
-                AppleList.load(apple);
-            });
-        }
-    });
+    Apples.load();
 });
