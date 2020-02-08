@@ -226,19 +226,30 @@ class ApplesApiCest
     /**
      * @param array $apples
      * @param int $appleId
+     * @return \StdClass
+     * @throws ErrorException
+     */
+    private function findApple(array $apples, int $appleId): \StdClass
+    {
+        foreach ($apples as $apple) {
+            $apple = (object)$apple;
+            if ($appleId === $apple->id) {
+                return $apple;
+            }
+        }
+
+        throw new ErrorException('Apple with id' . $appleId . ' not found');
+    }
+
+    /**
+     * @param array $apples
+     * @param int $appleId
      * @return float
      * @throws ErrorException
      */
     private function findEatenPercent(array $apples, int $appleId): float
     {
-        foreach ($apples as $apple) {
-            $apple = (object)$apple;
-            if ($appleId === $apple->id) {
-                return $apple->eatenPercent;
-            }
-        }
-
-        throw new ErrorException('Apple with id' . $appleId . ' not found');
+        return $this->findApple($apples, $appleId)->eatenPercent;
     }
 
     /**
@@ -353,5 +364,69 @@ class ApplesApiCest
         $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['message' => 'This apple has already rotted']);
+    }
+
+    /**
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesFallApi(ApiTester $I)
+    {
+        $I->wantToTest('to PATCH to fall apple');
+        $I->amBearerAuthenticated('tester-token');
+
+        $appleId = 3;
+
+        $I->sendPATCH('apples/' . $appleId);
+        $I->seeResponseCodeIs(HttpCode::OK);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['result' => 'success']);
+
+        $I->sendGET('apples');
+        $I->seeResponseCodeIs(HttpCode::OK);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['result' => 'success']);
+        $apples = $I->grabDataFromResponseByJsonPath('$.data.apples')[0];
+
+        $apple = $this->findApple($apples, $appleId);
+
+        $I->assertEquals(true, (bool)$apple->fallenAt);
+    }
+
+    /**
+     * @depends testApplesFallApi
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesFallTwiceApi(ApiTester $I)
+    {
+        $I->wantToTest('to PATCH to fall apple twice');
+        $I->amBearerAuthenticated('tester-token');
+
+        $appleId = 3;
+
+        $I->sendPATCH('apples/' . $appleId);
+        $I->sendPATCH('apples/' . $appleId);
+        $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['message' => 'This apple is already fallen']);
+    }
+
+    /**
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesFallUncreatedApi(ApiTester $I)
+    {
+        $I->wantToTest('to PATCH to fall uncreated apple');
+        $I->amBearerAuthenticated('tester-token');
+
+        $I->sendDELETE('apples/100');
+        $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['message' => 'Not found.']);
     }
 }
