@@ -4,18 +4,13 @@ declare(strict_types=1);
 namespace api\controllers\actions\apples;
 
 use common\domain\AppContext;
-use api\controllers\actions\apples\params\EatParams;
 use api\models\apple\services\AppleService;
-use api\models\apple\utils\Apples;
 use common\controllers\dtos\ObjectResponseDto;
-use common\domain\utils\ErrorMessageBuilder;
-use LogicException;
 use yii\base\Action;
 use yii\base\Controller;
-use yii\base\InvalidConfigException;
 use yii\web\BadRequestHttpException;
 
-class EatAction extends Action
+class FallAction extends Action
 {
 
     /**
@@ -51,34 +46,28 @@ class EatAction extends Action
 
     /**
      * @param int $id
-     * @param float $percent
      * @return ObjectResponseDto
      * @throws BadRequestHttpException
-     * @throws LogicException
      */
-    public function run(int $id, float $percent)
+    public function run(int $id)
     {
-        $params = new EatParams();
-
-        $params->load(['eatenPercent' => $percent]);
-        if (!$params->validate()) {
-            throw new BadRequestHttpException(ErrorMessageBuilder::build($params->errors));
-        }
-
         $userId = $this->appContext->getUserId();
 
         try {
             $apple = $this->appleService->findOneByIdAndUserId($id, $userId);
 
-            Apples::checkEatPossibility($apple, $percent);
+            if($apple->fallenAt) {
+                throw new \LogicException('This apple is already fallen');
+            }
 
-            $apple->eatenPercent += $percent;
+            $now = new \DateTime();
+            $apple->fallenAt = $now;
 
             $this->appleService->updateOne($apple);
         } catch (\Exception $e) {
             throw new BadRequestHttpException($e->getMessage());
         }
 
-        return new ObjectResponseDto();
+        return new ObjectResponseDto($now);
     }
 }

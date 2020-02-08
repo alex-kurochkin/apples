@@ -6,6 +6,7 @@ namespace api\controllers;
 use api\controllers\actions\apples\CreateAction;
 use api\controllers\actions\apples\DeleteAction;
 use api\controllers\actions\apples\EatAction;
+use api\controllers\actions\apples\FallAction;
 use api\controllers\actions\apples\ListAction;
 use common\components\RestController;
 use common\domain\AppConfig;
@@ -46,10 +47,10 @@ class ApplesController extends RestController
         $behaviors['verbs'] = [
             'class' => VerbFilter::class,
             'actions' => [
-                'options' => ['OPTIONS'],
                 'list' => ['GET'],
                 'create' => ['POST'],
                 'eat' => ['PATCH'],
+                'fall' => ['PATCH'],
                 'delete' => ['DELETE'],
             ],
         ];
@@ -71,6 +72,9 @@ class ApplesController extends RestController
             ],
             'create' => [
                 'class' => CreateAction::class,
+            ],
+            'fall' => [
+                'class' => FallAction::class,
             ],
             'delete' => [
                 'class' => DeleteAction::class,
