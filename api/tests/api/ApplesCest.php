@@ -183,6 +183,52 @@ class ApplesApiCest
      * @group ApplesAPI
      * @throws Exception
      */
+    public function testApplesEatMissedPercentApi(ApiTester $I)
+    {
+        $I->wantToTest('to UPDATE - eat apple missed percent');
+        $I->amBearerAuthenticated('tester-token');
+
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPATCH(
+            'apples/1',
+            [
+                'eatPercentPrecision' => 2,
+            ]
+        );
+        $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['message' => 'Eaten Percent cannot be blank.']);
+    }
+
+    /**
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesEatMissedPercentPrecisionApi(ApiTester $I)
+    {
+        $I->wantToTest('to UPDATE - eat apple missed percent precision');
+        $I->amBearerAuthenticated('tester-token');
+
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPATCH(
+            'apples/1',
+            [
+                'eatenPercent' => .5,
+            ]
+        );
+        $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['message' => 'Eat Percent Precision cannot be blank.']);
+    }
+
+    /**
+     * @depends testApplesEatMissedPercentApi
+     * @depends testApplesEatMissedPercentPrecisionApi
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
     public function testApplesEatApi(ApiTester $I)
     {
         $I->wantToTest('to UPDATE - eat apple');
@@ -211,56 +257,8 @@ class ApplesApiCest
     }
 
     /**
-     * @param ApiTester $I
-     * @param int $appleId
-     * @return float
-     * @throws ErrorException
-     * @throws Exception
-     */
-    private function getEatenPercent(ApiTester $I, int $appleId): float
-    {
-        $I->sendGET('apples');
-        $I->seeResponseCodeIs(HttpCode::OK);
-        $I->seeResponseIsJson();
-        $I->seeResponseContainsJson(['result' => 'success']);
-
-        $apples = $I->grabDataFromResponseByJsonPath('$.data.apples')[0];
-
-//        var_dump($apples);die;
-
-        return $this->findEatenPercent($apples, $appleId);
-    }
-
-    /**
-     * @param array $apples
-     * @param int $appleId
-     * @return float
-     * @throws ErrorException
-     */
-    private function findEatenPercent(array $apples, int $appleId): float
-    {
-        return $this->findApple($apples, $appleId)->eatenPercent;
-    }
-
-    /**
-     * @param array $apples
-     * @param int $appleId
-     * @return StdClass
-     * @throws ErrorException
-     */
-    private function findApple(array $apples, int $appleId): StdClass
-    {
-        foreach ($apples as $apple) {
-            $apple = (object)$apple;
-            if ($appleId === $apple->id) {
-                return $apple;
-            }
-        }
-
-        throw new ErrorException('Apple with id' . $appleId . ' not found');
-    }
-
-    /**
+     * @depends testApplesEatMissedPercentApi
+     * @depends testApplesEatMissedPercentPrecisionApi
      * @param ApiTester $I
      * @group ApplesAPI
      * @throws Exception
@@ -286,13 +284,15 @@ class ApplesApiCest
     }
 
     /**
+     * @depends testApplesEatMissedPercentApi
+     * @depends testApplesEatMissedPercentPrecisionApi
      * @param ApiTester $I
      * @group ApplesAPI
      * @throws Exception
      */
     public function testApplesEatUncreatedApi(ApiTester $I)
     {
-        $I->wantToTest('to UPDATE uncreated apple');
+        $I->wantToTest('to UPDATE eat uncreated apple');
         $I->amBearerAuthenticated('tester-token');
 
         $appleId = 100;
@@ -311,6 +311,8 @@ class ApplesApiCest
     }
 
     /**
+     * @depends testApplesEatMissedPercentApi
+     * @depends testApplesEatMissedPercentPrecisionApi
      * @param ApiTester $I
      * @group ApplesAPI
      * @throws Exception
@@ -336,6 +338,8 @@ class ApplesApiCest
     }
 
     /**
+     * @depends testApplesEatMissedPercentApi
+     * @depends testApplesEatMissedPercentPrecisionApi
      * @param ApiTester $I
      * @group ApplesAPI
      * @throws Exception
@@ -361,6 +365,8 @@ class ApplesApiCest
     }
 
     /**
+     * @depends testApplesEatMissedPercentApi
+     * @depends testApplesEatMissedPercentPrecisionApi
      * @param ApiTester $I
      * @group ApplesAPI
      * @throws Exception
@@ -405,6 +411,8 @@ class ApplesApiCest
     }
 
     /**
+     * @depends testApplesEatMissedPercentApi
+     * @depends testApplesEatMissedPercentPrecisionApi
      * @param ApiTester $I
      * @group ApplesAPI
      * @throws Exception
@@ -430,6 +438,8 @@ class ApplesApiCest
     }
 
     /**
+     * @depends testApplesEatMissedPercentApi
+     * @depends testApplesEatMissedPercentPrecisionApi
      * @param ApiTester $I
      * @group ApplesAPI
      * @throws Exception
@@ -516,5 +526,55 @@ class ApplesApiCest
         $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['message' => 'Not found.']);
+    }
+
+    //// SERVICE FUNCTIONS ////
+
+    /**
+     * @param ApiTester $I
+     * @param int $appleId
+     * @return float
+     * @throws ErrorException
+     * @throws Exception
+     */
+    private function getEatenPercent(ApiTester $I, int $appleId): float
+    {
+        $I->sendGET('apples');
+        $I->seeResponseCodeIs(HttpCode::OK);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['result' => 'success']);
+
+        $apples = $I->grabDataFromResponseByJsonPath('$.data.apples')[0];
+
+        return $this->findEatenPercent($apples, $appleId);
+    }
+
+    /**
+     * @param array $apples
+     * @param int $appleId
+     * @return float
+     * @throws ErrorException
+     */
+    private function findEatenPercent(array $apples, int $appleId): float
+    {
+        return $this->findApple($apples, $appleId)->eatenPercent;
+    }
+
+    /**
+     * @param array $apples
+     * @param int $appleId
+     * @return StdClass
+     * @throws ErrorException
+     */
+    private function findApple(array $apples, int $appleId): StdClass
+    {
+        foreach ($apples as $apple) {
+            $apple = (object)$apple;
+            if ($appleId === $apple->id) {
+                return $apple;
+            }
+        }
+
+        throw new ErrorException('Apple with id' . $appleId . ' not found');
     }
 }
