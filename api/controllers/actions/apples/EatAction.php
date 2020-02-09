@@ -3,15 +3,16 @@ declare(strict_types=1);
 
 namespace api\controllers\actions\apples;
 
+use common\components\Controller;
+use common\domain\AppConfig;
 use common\domain\AppContext;
 use api\controllers\actions\apples\params\EatParams;
 use api\models\apple\services\AppleService;
 use api\models\apple\utils\Apples;
 use common\controllers\dtos\ObjectResponseDto;
 use common\domain\utils\ErrorMessageBuilder;
-use LogicException;
+use Exception;
 use yii\base\Action;
-use yii\base\Controller;
 use yii\base\InvalidConfigException;
 use yii\web\BadRequestHttpException;
 
@@ -51,34 +52,42 @@ class EatAction extends Action
 
     /**
      * @param int $id
-     * @param float $percent
      * @return ObjectResponseDto
      * @throws BadRequestHttpException
-     * @throws LogicException
+     * @throws InvalidConfigException
      */
-    public function run(int $id, float $percent)
+    public function run(int $id)
     {
-        $params = new EatParams();
+        $patch = $this->controller->getRequest()->getBodyParams();
 
-        $params->load(['eatenPercent' => $percent]);
+        $params = new EatParams();
+        $params->load($patch);
         if (!$params->validate()) {
             throw new BadRequestHttpException(ErrorMessageBuilder::build($params->errors));
         }
+
+        $percent = $params->eatenPercent;
+        $eatPercentPrecision = $params->eatPercentPrecision;
 
         $userId = $this->appContext->getUserId();
 
         try {
             $apple = $this->appleService->findOneByIdAndUserId($id, $userId);
 
+            $percent = round($percent, $eatPercentPrecision);
             Apples::checkEatPossibility($apple, $percent);
 
-            $apple->eatenPercent += $percent;
+            $apple->eatenPercent = round($apple->eatenPercent + $percent, AppConfig::getAppleEatPrecision());
 
             $this->appleService->updateOne($apple);
-        } catch (\Exception $e) {
+
+            $paramsDto = new EatParams();
+            $paramsDto->eatenPercent = $apple->eatenPercent;
+            $paramsDto->eatPercentPrecision = AppConfig::getAppleEatPrecision();
+        } catch (Exception $e) {
             throw new BadRequestHttpException($e->getMessage());
         }
 
-        return new ObjectResponseDto($apple->eatenPercent);
+        return new ObjectResponseDto($paramsDto);
     }
 }

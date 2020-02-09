@@ -1,7 +1,10 @@
 <?php
+
 namespace api\tests\unit;
 
-class SystemTest extends \Codeception\Test\Unit
+use Codeception\Test\Unit;
+
+class SystemTest extends Unit
 {
 
     public function testPhpTimezone()

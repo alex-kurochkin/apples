@@ -10,6 +10,7 @@ use common\fixtures\apples\AppleColorArFixture;
 use common\fixtures\UserFixture;
 use \ErrorException;
 use \Exception;
+use StdClass;
 
 /**
  * Class ApplesApiCest
@@ -184,7 +185,7 @@ class ApplesApiCest
      */
     public function testApplesEatApi(ApiTester $I)
     {
-        $I->wantToTest('to UPDATE apple');
+        $I->wantToTest('to UPDATE - eat apple');
         $I->amBearerAuthenticated('tester-token');
 
         $appleId = 2;
@@ -192,7 +193,14 @@ class ApplesApiCest
 
         $percentBefore = $this->getEatenPercent($I, $appleId);
 
-        $I->sendPATCH('apples/' . $appleId . '/' . $eatPercent);
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPATCH(
+            'apples/' . $appleId,
+            [
+                'eatenPercent' => $eatPercent,
+                'eatPercentPrecision' => 2,
+            ]
+        );
         $I->seeResponseCodeIs(HttpCode::OK);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['result' => 'success']);
@@ -226,10 +234,21 @@ class ApplesApiCest
     /**
      * @param array $apples
      * @param int $appleId
-     * @return \StdClass
+     * @return float
      * @throws ErrorException
      */
-    private function findApple(array $apples, int $appleId): \StdClass
+    private function findEatenPercent(array $apples, int $appleId): float
+    {
+        return $this->findApple($apples, $appleId)->eatenPercent;
+    }
+
+    /**
+     * @param array $apples
+     * @param int $appleId
+     * @return StdClass
+     * @throws ErrorException
+     */
+    private function findApple(array $apples, int $appleId): StdClass
     {
         foreach ($apples as $apple) {
             $apple = (object)$apple;
@@ -239,17 +258,6 @@ class ApplesApiCest
         }
 
         throw new ErrorException('Apple with id' . $appleId . ' not found');
-    }
-
-    /**
-     * @param array $apples
-     * @param int $appleId
-     * @return float
-     * @throws ErrorException
-     */
-    private function findEatenPercent(array $apples, int $appleId): float
-    {
-        return $this->findApple($apples, $appleId)->eatenPercent;
     }
 
     /**
@@ -265,7 +273,13 @@ class ApplesApiCest
         $appleId = 1;
         $eatPercent = 0; // <--- Try to lick, it's possible. Why not? )))
 
-        $I->sendPATCH('apples/' . $appleId . '/' . $eatPercent);
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPATCH('apples/' . $appleId,
+            [
+                'eatenPercent' => $eatPercent,
+                'eatPercentPrecision' => 2,
+            ]
+        );
         $I->seeResponseCodeIs(HttpCode::OK);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['result' => 'success']);
@@ -284,7 +298,13 @@ class ApplesApiCest
         $appleId = 100;
         $eatPercent = 0.1;
 
-        $I->sendPATCH('apples/' . $appleId . '/' . $eatPercent);
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPATCH('apples/' . $appleId,
+            [
+                'eatenPercent' => $eatPercent,
+                'eatPercentPrecision' => 2,
+            ]
+        );
         $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['message' => 'Not found.']);
@@ -303,7 +323,13 @@ class ApplesApiCest
         $appleId = 1;
         $eatPercent = 1.15;
 
-        $I->sendPATCH('apples/' . $appleId . '/' . $eatPercent);
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPATCH('apples/' . $appleId,
+            [
+                'eatenPercent' => $eatPercent,
+                'eatPercentPrecision' => 2,
+            ]
+        );
         $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['message' => 'Eaten Percent must be no greater than 1.']);
@@ -322,10 +348,60 @@ class ApplesApiCest
         $appleId = 2;
         $eatPercent = 0.6; // 0.5 + 0.6 = 1.1
 
-        $I->sendPATCH('apples/' . $appleId . '/' . $eatPercent);
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPATCH('apples/' . $appleId,
+            [
+                'eatenPercent' => $eatPercent,
+                'eatPercentPrecision' => 2,
+            ]
+        );
         $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['message' => 'You are trying to bite off more than the remaining apple']);
+    }
+
+    /**
+     * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesEatPrecisionApi(ApiTester $I)
+    {
+        $I->wantToTest('to UPDATE apple check precision');
+        $I->amBearerAuthenticated('tester-token');
+
+        $appleId = 1;
+        $eatPercent1 = 0.1;
+
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPATCH('apples/' . $appleId,
+            [
+                'eatenPercent' => $eatPercent1,
+                'eatPercentPrecision' => 1,
+            ]
+        );
+        $I->seeResponseCodeIs(HttpCode::OK);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['result' => 'success']);
+
+        $percentAfter1 = (string)$this->getEatenPercent($I, $appleId);
+        $I->assertEquals('0.1', $percentAfter1);
+
+        $eatPercent2 = 0.2;
+
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPATCH('apples/' . $appleId,
+            [
+                'eatenPercent' => $eatPercent2,
+                'eatPercentPrecision' => 1,
+            ]
+        );
+        $I->seeResponseCodeIs(HttpCode::OK);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['result' => 'success']);
+
+        $percentAfter2 = (string)$this->getEatenPercent($I, $appleId);
+        $I->assertEquals('0.3', $percentAfter2);
     }
 
     /**
@@ -341,7 +417,13 @@ class ApplesApiCest
         $appleId = 3;
         $eatPercent = 0.1;
 
-        $I->sendPATCH('apples/' . $appleId . '/' . $eatPercent);
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPATCH('apples/' . $appleId,
+            [
+                'eatenPercent' => $eatPercent,
+                'eatPercentPrecision' => 2,
+            ]
+        );
         $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['message' => 'This apple is unripe yet']);
@@ -360,7 +442,13 @@ class ApplesApiCest
         $appleId = 4;
         $eatPercent = 0.1;
 
-        $I->sendPATCH('apples/' . $appleId . '/' . $eatPercent);
+        $I->haveHttpHeader('Content-Type', 'application/json');
+        $I->sendPATCH('apples/' . $appleId,
+            [
+                'eatenPercent' => $eatPercent,
+                'eatPercentPrecision' => 2,
+            ]
+        );
         $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['message' => 'This apple has already rotted']);
@@ -373,12 +461,12 @@ class ApplesApiCest
      */
     public function testApplesFallApi(ApiTester $I)
     {
-        $I->wantToTest('to PATCH to fall apple');
+        $I->wantToTest('to PUT to fall apple');
         $I->amBearerAuthenticated('tester-token');
 
         $appleId = 3;
 
-        $I->sendPATCH('apples/' . $appleId);
+        $I->sendPUT('apples/' . $appleId);
         $I->seeResponseCodeIs(HttpCode::OK);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['result' => 'success']);
@@ -402,13 +490,13 @@ class ApplesApiCest
      */
     public function testApplesFallTwiceApi(ApiTester $I)
     {
-        $I->wantToTest('to PATCH to fall apple twice');
+        $I->wantToTest('to PUT to fall apple twice');
         $I->amBearerAuthenticated('tester-token');
 
         $appleId = 3;
 
-        $I->sendPATCH('apples/' . $appleId);
-        $I->sendPATCH('apples/' . $appleId);
+        $I->sendPUT('apples/' . $appleId);
+        $I->sendPUT('apples/' . $appleId);
         $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['message' => 'This apple is already fallen']);
@@ -421,10 +509,10 @@ class ApplesApiCest
      */
     public function testApplesFallUncreatedApi(ApiTester $I)
     {
-        $I->wantToTest('to PATCH to fall uncreated apple');
+        $I->wantToTest('to PUT to fall uncreated apple');
         $I->amBearerAuthenticated('tester-token');
 
-        $I->sendDELETE('apples/100');
+        $I->sendPUT('apples/100');
         $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['message' => 'Not found.']);

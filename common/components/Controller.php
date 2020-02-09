@@ -22,6 +22,14 @@ abstract class Controller extends \yii\web\Controller
     /** @var Request Request object */
     protected $request;
 
+    /**
+     * @return Request
+     */
+    public function getRequest(): Request
+    {
+        return $this->request;
+    }
+
     /** @var ServiceRoute Service route */
     protected $service;
 

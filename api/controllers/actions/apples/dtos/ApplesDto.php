@@ -14,7 +14,9 @@ use common\controllers\dtos\BaseDto;
 class ApplesDto extends BaseDto
 {
 
-    /** @var Apple[] */
+    /**
+     * @var Apple[]
+     */
     public $apples;
 
     /**
@@ -22,6 +24,13 @@ class ApplesDto extends BaseDto
      */
     public $appleColors = [];
 
-    /** @var int hours */
+    /**
+     * @var int hours
+     */
     public $freshDuration;
+
+    /**
+     * @var int Eat percent precision
+     */
+    public $eatPercentPrecision;
 }

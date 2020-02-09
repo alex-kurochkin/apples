@@ -56,8 +56,8 @@ return [
             'rules' => [ // OPTIONS required for CORS preflight requests
                 'GET,OPTIONS apples' => 'apples/list',
                 'POST,OPTIONS apples' => 'apples/create',
-                'PATCH,OPTIONS apples/<id:\d+>/<percent:[\d\.]+>' => 'apples/eat',
-                'PATCH,OPTIONS apples/<id:\d+>' => 'apples/fall',
+                'PATCH,OPTIONS apples/<id:\d+>' => 'apples/eat',
+                'PUT,OPTIONS apples/<id:\d+>' => 'apples/fall',
                 'DELETE,OPTIONS apples/<id:\d+>' => 'apples/delete',
             ],
         ],

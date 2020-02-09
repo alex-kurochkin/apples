@@ -7,6 +7,9 @@ use common\domain\AppContext;
 use api\models\apple\services\AppleService;
 use common\controllers\dtos\ObjectResponseDto;
 use common\domain\utils\DateTimes;
+use DateTime;
+use Exception;
+use LogicException;
 use yii\base\Action;
 use yii\base\Controller;
 use yii\web\BadRequestHttpException;
@@ -57,15 +60,15 @@ class FallAction extends Action
         try {
             $apple = $this->appleService->findOneByIdAndUserId($id, $userId);
 
-            if($apple->fallenAt) {
-                throw new \LogicException('This apple is already fallen');
+            if ($apple->fallenAt) {
+                throw new LogicException('This apple is already fallen');
             }
 
-            $now = new \DateTime();
+            $now = new DateTime();
             $apple->fallenAt = $now;
 
             $this->appleService->updateOne($apple);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new BadRequestHttpException($e->getMessage());
         }
 

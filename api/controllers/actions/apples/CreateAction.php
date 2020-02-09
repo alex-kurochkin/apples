@@ -6,6 +6,7 @@ namespace api\controllers\actions\apples;
 use common\domain\AppContext;
 use api\models\apple\services\AppleService;
 use common\controllers\dtos\ObjectResponseDto;
+use Exception;
 use yii\base\Action;
 use yii\base\Controller;
 use yii\web\BadRequestHttpException;
@@ -55,7 +56,7 @@ class CreateAction extends Action
 
         try {
             $this->appleService->createMany($userId, $count);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new BadRequestHttpException($e->getMessage());
         }
 

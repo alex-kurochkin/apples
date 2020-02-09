@@ -50,7 +50,7 @@ class ApplesController extends RestController
                 'list' => ['GET'],
                 'create' => ['POST'],
                 'eat' => ['PATCH'],
-                'fall' => ['PATCH'],
+                'fall' => ['PUT'],
                 'delete' => ['DELETE'],
             ],
         ];

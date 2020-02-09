@@ -17,6 +17,14 @@ const detectAppleState = function (state) {
     return '???';
 };
 
+const showMessage = function (jqXHR) {
+    if(jqXHR.responseJSON && jqXHR.responseJSON.message) {
+        alert(jqXHR.responseJSON.message);
+        return;
+    }
+    alert('Server error detected');
+};
+
 /**
  *
  * @param fallenDT {Date}
@@ -37,8 +45,9 @@ const AppleList = function () {
     'use strict';
 
     let applesList = $('#apples-list');
+
     return {
-        load: function(apples, appleColors, freshDuration) {
+        load: function (apples, appleColors, freshDuration, precision) {
             AppleColors.load(appleColors);
 
             applesList.empty();
@@ -52,36 +61,40 @@ const AppleList = function () {
                     apple.state = calculateFresh(new Date(apple.fallenAt), freshDuration);
                 }
 
-                AppleList.loadApple(apple);
+                AppleList.loadApple(apple, precision);
             });
         },
-        loadApple: function (apple) {
+        loadApple: function (apple, precision) {
+            let step = '0.' + '0'.repeat(precision - 1) + '1';
             applesList.append('<tr id="' + apple.id + '">' +
                 '<td>' + apple.id + '</td>' +
                 '<td>' + apple.color + '</td>' +
                 '<td>' + apple.createdAt + '</td>' +
                 '<td><a href="javascript:void(0);" class="fallApple" data-id="' + apple.id + '">' + 'Fall it' + '</a></td>' +
                 '<td id="fallenAt' + apple.id + '">' + (apple.fallenAt ? apple.fallenAt : '') + '</td>' +
-                '<td>' + detectAppleState(apple.state) + '</td>' +
-                '<td><a href="javascript:void(0);" class="eatApple" data-id="' + apple.id + '">' + 'Eat' + '</a> <input id="eatPercent' + apple.id + '" type="number" step="0.1" min="0" max="1" value="0" /></td>' +
-                '<td id="eatenPercent' + apple.id + '">' + apple.eatenPercent + '</td>' +
+                '<td id="status' + apple.id + '">' + detectAppleState(apple.state) + '</td>' +
+                '<td><a href="javascript:void(0);" class="eatApple" data-id="' + apple.id + '">' + 'Eat' + '</a> <input id="eatPercent' + apple.id + '" type="number" step="' + step + '" min="0" max="1" value="0" /></td>' +
+                '<td id="eatenPercent' + apple.id + '">' + apple.eatenPercent.toFixed(precision) + '</td>' +
                 '<td><a href="javascript:void(0);" class="dropApple" data-id="' + apple.id + '">' + 'Drop it' + '</a></td>' +
                 '</tr>');
         },
         getEatPercent: function (id) {
             return $('input#eatPercent' + id, applesList).val();
         },
-        setEatenPercent: function (id, percent) {
-            $('td#eatenPercent' + id, applesList).text(percent.toFixed(1));
+        setEatenPercent: function (id, percent, precision) {
+            $('td#eatenPercent' + id, applesList).text(percent.toFixed(precision));
         },
         setFallDT: function (id, dt) {
             $('td#fallenAt' + id, applesList).text(dt);
+            $('td#status' + id, applesList).text('fresh');
         }
     }
 }();
 
 const Apples = function () {
     'use strict';
+
+    let precision = 0;
 
     return {
         load: function () {
@@ -97,14 +110,21 @@ const Apples = function () {
                 success: function (data) {
                     let apples = data.data.apples,
                         appleColors = data.data.appleColors,
-                        freshDuration = data.data.freshDuration; // hours
+                        /** {int} hours */
+                        freshDuration = data.data.freshDuration;
 
-                    AppleList.load(apples, appleColors, freshDuration);
+                    /** {int} Apple eat percent precision */
+                    precision = data.data.eatPercentPrecision;
+
+                    AppleList.load(apples, appleColors, freshDuration, precision);
                 },
                 error: function (jqXHR) {
-                    alert(jqXHR.responseJSON.message);
+                    showMessage(jqXHR);
                 }
             });
+        },
+        getEatPercentPrecision: function () {
+            return precision;
         }
     };
 }();
@@ -113,6 +133,7 @@ const AppleColors = function () {
     'use strict';
 
     let colors = [];
+
     return {
         load: function (appleColors) {
             colors = [];
@@ -152,7 +173,7 @@ $(document).ready(function () {
                 alert('Added ' + data.data + ' apples');
             },
             error: function (jqXHR) {
-                alert(jqXHR.responseJSON.message);
+                showMessage(jqXHR);
             }
         });
     });
@@ -166,14 +187,14 @@ $(document).ready(function () {
                 'Authorization': 'Bearer ' + AccessToken,
                 'Content-Type': 'application/json'
             },
-            method: 'PATCH',
+            method: 'PUT',
             dataType: 'json',
             data: '',
             success: function (data) {
                 AppleList.setFallDT(id, data.data);
             },
             error: function (jqXHR) {
-                alert(jqXHR.responseJSON.message);
+                showMessage(jqXHR);
             }
         });
     });
@@ -194,7 +215,7 @@ $(document).ready(function () {
                 Apples.load();
             },
             error: function (jqXHR) {
-                alert(jqXHR.responseJSON.message);
+                showMessage(jqXHR);
             }
         });
     });
@@ -202,30 +223,37 @@ $(document).ready(function () {
     //// EAT APPLE ////
     $('#applesTable').on('click', 'a.eatApple', function () {
         let id = $(this).data('id'),
-            eatPercent = parseFloat(AppleList.getEatPercent(id));
-
-        if(0.0 === eatPercent) {
-            alert('You wanna leak apple? Yes, it\'s possible! )');
-        }
+            eatPercent = parseFloat(AppleList.getEatPercent(id)),
+            eatPercentPrecision = Apples.getEatPercentPrecision();
 
         $.ajax({
-            url: 'http://api-apples.local/apples/' + id + '/' + eatPercent,
+            url: 'http://api-apples.local/apples/' + id,
             headers: {
                 'Authorization': 'Bearer ' + AccessToken,
                 'Content-Type': 'application/json'
             },
             method: 'PATCH',
             dataType: 'json',
-            data: '',
+            data: JSON.stringify({
+                eatenPercent: eatPercent,
+                eatPercentPrecision: eatPercentPrecision
+            }),
             success: function (data) {
-                AppleList.setEatenPercent(id, data.data);
+
+                if (0.0 === eatPercent) {
+                    alert('You wanna leak apple? Yes, it\'s possible! )');
+                }
+
+                let percent = data.data.eatenPercent,
+                    precision = data.data.eatPercentPrecision;
+                AppleList.setEatenPercent(id, percent, precision);
             },
             error: function (jqXHR) {
-                alert(jqXHR.responseJSON.message);
+                showMessage(jqXHR);
             }
         });
     });
 
-    //// LOAD TABLE ////
+    //// INIT PAGE - LOAD TABLE ////
     Apples.load();
 });

@@ -93,7 +93,8 @@ class ListAction extends Action
             $applesDto->appleColors = $this->appleColorMapper->toManyDtos($appleColors);
         }
 
-        $applesDto->freshDuration = AppConfig::getAppleFreshDuration(); // hours
+        $applesDto->freshDuration = AppConfig::getAppleFreshDuration(); // int, hours
+        $applesDto->eatPercentPrecision = AppConfig::getAppleEatPrecision(); // int
 
         return new ObjectResponseDto($applesDto);
     }
