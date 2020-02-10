@@ -64,6 +64,11 @@ class AppleService
         $apples = [];
 
         $appleColors = $this->appleColorService->findManyByUserId($userId);
+
+        if (!$appleColors) {
+            throw new \LogicException('No apple colors are found for this user');
+        }
+
         $colorIds = ObjectArrays::createFieldArray($appleColors, 'id');
 
         while ($count--) {

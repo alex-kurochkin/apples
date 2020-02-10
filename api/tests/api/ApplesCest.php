@@ -79,6 +79,22 @@ class ApplesApiCest
 
     /**
      * @param ApiTester $I
+     * @group ApplesAPI
+     * @throws Exception
+     */
+    public function testApplesCreateNoColorsApi(ApiTester $I)
+    {
+        $I->wantToTest('to CREATE apples with error - no colors');
+        $I->amBearerAuthenticated('tester2-token');
+
+        $I->sendPOST('apples');
+        $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
+        $I->seeResponseIsJson();
+        $I->seeResponseContainsJson(['message' => 'No apple colors are found for this user']);
+    }
+
+    /**
+     * @param ApiTester $I
      * @return int
      * @throws Exception
      * @group ApplesAPI
