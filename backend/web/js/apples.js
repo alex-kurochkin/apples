@@ -157,7 +157,7 @@ const AppleColors = function () {
 $(document).ready(function () {
     'use strict';
 
-    //// CREATE APPLE ////
+    //// CREATE APPLES ////
     $('a#createApples').on('click', function () {
         $.ajax({
             url: 'http://api-apples.local/apples',
@@ -182,7 +182,7 @@ $(document).ready(function () {
     $('#applesTable').on('click', 'a.fallApple', function () {
         let id = $(this).data('id');
         $.ajax({
-            url: 'http://api-apples.local/apples/' + id,
+            url: 'http://api-apples.local/apple/' + id,
             headers: {
                 'Authorization': 'Bearer ' + AccessToken,
                 'Content-Type': 'application/json'
@@ -203,7 +203,7 @@ $(document).ready(function () {
     $('#applesTable').on('click', 'a.dropApple', function () {
         let id = $(this).data('id');
         $.ajax({
-            url: 'http://api-apples.local/apples/' + id,
+            url: 'http://api-apples.local/apple/' + id,
             headers: {
                 'Authorization': 'Bearer ' + AccessToken,
                 'Content-Type': 'application/json'
@@ -227,7 +227,7 @@ $(document).ready(function () {
             eatPercentPrecision = Apples.getEatPercentPrecision();
 
         $.ajax({
-            url: 'http://api-apples.local/apples/' + id,
+            url: 'http://api-apples.local/apple/' + id,
             headers: {
                 'Authorization': 'Bearer ' + AccessToken,
                 'Content-Type': 'application/json'

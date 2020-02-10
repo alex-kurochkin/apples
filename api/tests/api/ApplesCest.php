@@ -145,7 +145,7 @@ class ApplesApiCest
         $I->wantToTest('to DELETE uncreated apple');
         $I->amBearerAuthenticated('tester-token');
 
-        $I->sendDELETE('apples/100');
+        $I->sendDELETE('apple/100');
         $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['message' => 'Not found.']);
@@ -164,7 +164,7 @@ class ApplesApiCest
         $I->wantToTest('to DELETE apple');
         $I->amBearerAuthenticated('tester-token');
 
-        $I->sendDELETE('apples/1');
+        $I->sendDELETE('apple/1');
         $I->seeResponseCodeIs(HttpCode::OK);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['result' => 'success']);
@@ -190,7 +190,7 @@ class ApplesApiCest
 
         $I->haveHttpHeader('Content-Type', 'application/json');
         $I->sendPATCH(
-            'apples/1',
+            'apple/1',
             [
                 'eatPercentPrecision' => 2,
             ]
@@ -212,7 +212,7 @@ class ApplesApiCest
 
         $I->haveHttpHeader('Content-Type', 'application/json');
         $I->sendPATCH(
-            'apples/1',
+            'apple/1',
             [
                 'eatenPercent' => .5,
             ]
@@ -241,7 +241,7 @@ class ApplesApiCest
 
         $I->haveHttpHeader('Content-Type', 'application/json');
         $I->sendPATCH(
-            'apples/' . $appleId,
+            'apple/' . $appleId,
             [
                 'eatenPercent' => $eatPercent,
                 'eatPercentPrecision' => 2,
@@ -272,7 +272,7 @@ class ApplesApiCest
         $eatPercent = 0; // <--- Try to lick, it's possible. Why not? )))
 
         $I->haveHttpHeader('Content-Type', 'application/json');
-        $I->sendPATCH('apples/' . $appleId,
+        $I->sendPATCH('apple/' . $appleId,
             [
                 'eatenPercent' => $eatPercent,
                 'eatPercentPrecision' => 2,
@@ -299,7 +299,7 @@ class ApplesApiCest
         $eatPercent = 0.1;
 
         $I->haveHttpHeader('Content-Type', 'application/json');
-        $I->sendPATCH('apples/' . $appleId,
+        $I->sendPATCH('apple/' . $appleId,
             [
                 'eatenPercent' => $eatPercent,
                 'eatPercentPrecision' => 2,
@@ -326,7 +326,7 @@ class ApplesApiCest
         $eatPercent = 1.15;
 
         $I->haveHttpHeader('Content-Type', 'application/json');
-        $I->sendPATCH('apples/' . $appleId,
+        $I->sendPATCH('apple/' . $appleId,
             [
                 'eatenPercent' => $eatPercent,
                 'eatPercentPrecision' => 2,
@@ -353,7 +353,7 @@ class ApplesApiCest
         $eatPercent = 0.6; // 0.5 + 0.6 = 1.1
 
         $I->haveHttpHeader('Content-Type', 'application/json');
-        $I->sendPATCH('apples/' . $appleId,
+        $I->sendPATCH('apple/' . $appleId,
             [
                 'eatenPercent' => $eatPercent,
                 'eatPercentPrecision' => 2,
@@ -380,7 +380,7 @@ class ApplesApiCest
         $eatPercent1 = 0.1;
 
         $I->haveHttpHeader('Content-Type', 'application/json');
-        $I->sendPATCH('apples/' . $appleId,
+        $I->sendPATCH('apple/' . $appleId,
             [
                 'eatenPercent' => $eatPercent1,
                 'eatPercentPrecision' => 1,
@@ -396,7 +396,7 @@ class ApplesApiCest
         $eatPercent2 = 0.2;
 
         $I->haveHttpHeader('Content-Type', 'application/json');
-        $I->sendPATCH('apples/' . $appleId,
+        $I->sendPATCH('apple/' . $appleId,
             [
                 'eatenPercent' => $eatPercent2,
                 'eatPercentPrecision' => 1,
@@ -426,7 +426,7 @@ class ApplesApiCest
         $eatPercent = 0.1;
 
         $I->haveHttpHeader('Content-Type', 'application/json');
-        $I->sendPATCH('apples/' . $appleId,
+        $I->sendPATCH('apple/' . $appleId,
             [
                 'eatenPercent' => $eatPercent,
                 'eatPercentPrecision' => 2,
@@ -453,7 +453,7 @@ class ApplesApiCest
         $eatPercent = 0.1;
 
         $I->haveHttpHeader('Content-Type', 'application/json');
-        $I->sendPATCH('apples/' . $appleId,
+        $I->sendPATCH('apple/' . $appleId,
             [
                 'eatenPercent' => $eatPercent,
                 'eatPercentPrecision' => 2,
@@ -476,7 +476,7 @@ class ApplesApiCest
 
         $appleId = 3;
 
-        $I->sendPUT('apples/' . $appleId);
+        $I->sendPUT('apple/' . $appleId);
         $I->seeResponseCodeIs(HttpCode::OK);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['result' => 'success']);
@@ -505,8 +505,8 @@ class ApplesApiCest
 
         $appleId = 3;
 
-        $I->sendPUT('apples/' . $appleId);
-        $I->sendPUT('apples/' . $appleId);
+        $I->sendPUT('apple/' . $appleId);
+        $I->sendPUT('apple/' . $appleId);
         $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['message' => 'This apple is already fallen']);
@@ -522,7 +522,7 @@ class ApplesApiCest
         $I->wantToTest('to PUT to fall uncreated apple');
         $I->amBearerAuthenticated('tester-token');
 
-        $I->sendPUT('apples/100');
+        $I->sendPUT('apple/100');
         $I->seeResponseCodeIs(HttpCode::BAD_REQUEST);
         $I->seeResponseIsJson();
         $I->seeResponseContainsJson(['message' => 'Not found.']);
